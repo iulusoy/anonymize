@@ -85,9 +85,8 @@ def init_spacy(lang):
 
 
 def init_transformers():
-    # ner_recognizer = pipeline("token-classification")
     ner_recognizer = pipeline(
-        "token-classification", model="xlm-roberta-large-finetuned-conll03-english"
+        "token-classification", model="xlm-roberta-large-finetuned-conll03-english", device_map = 'cuda'
     )
     return ner_recognizer
 
@@ -105,8 +104,8 @@ def make_dir(path: str):
 
 
 if __name__ == "__main__":
-    # nlp_spacy = init_spacy(lang)
-    # nlp_transformers = init_transformers()
+    nlp_spacy = init_spacy(lang)
+    nlp_transformers = init_transformers()
 
     # check that input dir is there
     if not check_dir(path_input):
@@ -132,21 +131,22 @@ if __name__ == "__main__":
         # skip this text if email could not be parsed
         if not text:
             continue 
-        ### nlp = init_spacy(sprache)   
-        # doc_spacy = nlp_spacy(text) ### fehlt - alte version
-        # text = get_sentences(doc_spacy)
+        ### nlp = init_spacy(sprache) done l.108
+        doc_spacy = nlp_spacy(text) ### fehlt - alte version
+        text = get_sentences(doc_spacy)
         # start with first line
         # here you can limit the number of sentences to parse
-        # newlist = []
-        # max_i = len(text) ### weg
+        newlist = []
+        max_i = len(text) ### weg
         ### init transformers
-        # for i in range(0, max_i):
+        for i in range(0, max_i):
         #     if tool == "transformers": ### gibt nur eins
-        #         nlps = nlp_transformers(text[i]) ### fehlty bzw process_doc
-        #         doc = nlps
-        #     newlist.append(process_doc(doc, ner_tool=tool, text=text[i]))
-        #     newlist[i] = " ".join(newlist[i])
+            nlps = nlp_transformers(text[i]) ### fehlty bzw process_doc
+            doc = nlps
+            newlist.append(process_doc(doc, ner_tool=tool, text=text[i]))
+            newlist[i] = " ".join(newlist[i])
         # join the new and old lines for comparison
-        # printout = "New: " + " ".join(newlist) + "\n"
-        # printout = printout + "Old: " + " ".join(text[0:max_i])
+        printout = "New: " + " ".join(newlist) + "\n"
+        printout = printout + "Old: " + " ".join(text[0:max_i])
+        print(printout)
         # write_file(printout, path_output + "/" + file)

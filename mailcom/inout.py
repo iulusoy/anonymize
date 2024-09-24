@@ -3,6 +3,7 @@ import os
 import eml_parser
 from bs4 import BeautifulSoup
 from dicttoxml import dicttoxml
+import unicodedata
 
 class InoutHandler:
     def __init__(self, directory_name: str):
@@ -52,13 +53,16 @@ class InoutHandler:
             raw_email = fhdl.read()
         ep = eml_parser.EmlParser(include_raw_body=True)
         parsed_eml = ep.decode_email_bytes(raw_email)
+        # content = parsed_eml["body"][0]["content"]
+        mapping =  dict.fromkeys(range(32))
+        # res = content.translate(mapping)
         attachmenttypes = []
         # find if there are any attachements, and if yes, how many
         attachments = len(parsed_eml["attachment"]) if "attachment" in parsed_eml else 0
         # find the types of attachements
         if attachments > 0:
             attachmenttypes = [parsed_eml["attachment"][i]["extension"] for i in range(attachments)]
-        self.email_content = {"content": parsed_eml["body"][0]["content"], 
+        self.email_content = {"content": parsed_eml["body"][0]["content"].translate(mapping), 
                     "date": parsed_eml["header"]["date"], 
                     "attachment": attachments, 
                     "attachement type": attachmenttypes

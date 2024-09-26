@@ -86,7 +86,7 @@ def init_spacy(lang):
 
 def init_transformers():
     ner_recognizer = pipeline(
-        "token-classification", model="xlm-roberta-large-finetuned-conll03-english", device_map = 'cuda'
+        "token-classification", model="xlm-roberta-large-finetuned-conll03-english", device_map = 'cuda',
     )
     return ner_recognizer
 
@@ -122,8 +122,6 @@ if __name__ == "__main__":
     for file in io.email_list:
         text = io.get_text(file)
         text = io.get_html_text(text)
-        xml = io.data_to_xml(text)
-        io.write_file(xml, path_output / output_filename)
         # print(text)
         # print(io.email_content["date"])
         # print(io.email_content["attachment"])
@@ -131,17 +129,13 @@ if __name__ == "__main__":
         # skip this text if email could not be parsed
         if not text:
             continue 
-        ### nlp = init_spacy(sprache) done l.108
-        doc_spacy = nlp_spacy(text) ### fehlt - alte version
+        doc_spacy = nlp_spacy(text)
         text = get_sentences(doc_spacy)
         # start with first line
-        # here you can limit the number of sentences to parse
         newlist = []
-        max_i = len(text) ### weg
-        ### init transformers
+        max_i = len(text)
         for i in range(0, max_i):
-        #     if tool == "transformers": ### gibt nur eins
-            nlps = nlp_transformers(text[i]) ### fehlty bzw process_doc
+            nlps = nlp_transformers(text[i])
             doc = nlps
             newlist.append(process_doc(doc, ner_tool=tool, text=text[i]))
             newlist[i] = " ".join(newlist[i])
@@ -149,4 +143,6 @@ if __name__ == "__main__":
         printout = "New: " + " ".join(newlist) + "\n"
         printout = printout + "Old: " + " ".join(text[0:max_i])
         print(printout)
-        # write_file(printout, path_output + "/" + file)
+        # parse pseudomized sentences to xml and write to file
+        xml = io.data_to_xml(newlist)
+        io.write_file(xml, path_output / output_filename)
